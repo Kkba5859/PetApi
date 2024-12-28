@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace PetApi.Controllers
 {
@@ -26,12 +26,16 @@ namespace PetApi.Controllers
 
         // Метод для входа пользователя
         [HttpPost]
-        public IActionResult Login([FromBody] UserDto request)
+        public async Task<IActionResult> Login([FromBody] UserDto request)
         {
             try
             {
-                // Поиск пользователя
-                var user = _context.Users.FirstOrDefault(u => u.Username == request.Username);
+                // Используем асинхронный поиск пользователя и только необходимые поля
+                var user = await _context.Users
+                    .Where(u => u.Username == request.Username)
+                    .Select(u => new { u.Username, u.PasswordHash })
+                    .FirstOrDefaultAsync();
+
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 {
                     _logger.LogWarning("Invalid login attempt for user: {Username}", request.Username);
@@ -66,5 +70,4 @@ namespace PetApi.Controllers
             }
         }
     }
-
-    }
+}

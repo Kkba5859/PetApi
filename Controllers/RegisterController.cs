@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PetApi.Models;
 using PetApi.Data;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace PetApi.Controllers
 {
@@ -24,9 +24,16 @@ namespace PetApi.Controllers
         {
             try
             {
-                // Проверка существования пользователя
-                if (_context.Users.Any(u => u.Username == request.Username))
+                // Проверка существования пользователя с использованием асинхронного запроса
+                var existingUser = await _context.Users
+                    .Where(u => u.Username == request.Username)
+                    .FirstOrDefaultAsync();
+
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("User already exists: {Username}", request.Username);
                     return BadRequest("Пользователь уже существует.");
+                }
 
                 // Создание пользователя с хэшированным паролем
                 var user = new User
@@ -35,7 +42,7 @@ namespace PetApi.Controllers
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
                 };
 
-                _context.Users.Add(user);
+                await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("User registered successfully: {Username}", request.Username);
@@ -49,6 +56,4 @@ namespace PetApi.Controllers
             }
         }
     }
-
-   
 }
