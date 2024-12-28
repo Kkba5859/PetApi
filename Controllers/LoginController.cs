@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Models;
 using PetApi.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,12 +17,14 @@ namespace PetApi.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<LoginController> _logger;
+        private readonly IMapper _mapper;
 
-        public LoginController(ApplicationDbContext context, IConfiguration configuration, ILogger<LoginController> logger)
+        public LoginController(ApplicationDbContext context, IConfiguration configuration, ILogger<LoginController> logger, IMapper mapper)
         {
             _context = context;
             _configuration = configuration;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // Метод для входа пользователя
@@ -30,10 +33,8 @@ namespace PetApi.Controllers
         {
             try
             {
-                // Используем асинхронный поиск пользователя и только необходимые поля
                 var user = await _context.Users
                     .Where(u => u.Username == request.Username)
-                    .Select(u => new { u.Username, u.PasswordHash })
                     .FirstOrDefaultAsync();
 
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -42,11 +43,7 @@ namespace PetApi.Controllers
                     return BadRequest("Неверные учетные данные.");
                 }
 
-                // Создание JWT токена
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                };
+                var claims = new[] { new Claim(ClaimTypes.Name, user.Username) };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

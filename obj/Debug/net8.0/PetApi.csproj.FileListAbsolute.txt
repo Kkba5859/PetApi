@@ -142,3 +142,4 @@ C:\Users\Administrator\source\repos\PetApi\obj\Debug\net8.0\PetApi.pdb
 C:\Users\Administrator\source\repos\PetApi\obj\Debug\net8.0\PetApi.genruntimeconfig.cache
 C:\Users\Administrator\source\repos\PetApi\obj\Debug\net8.0\ref\PetApi.dll
 C:\Users\Administrator\source\repos\PetApi\obj\Debug\net8.0\PetApi.sourcelink.json
+C:\Users\Administrator\source\repos\PetApi\bin\Debug\net8.0\AutoMapper.dll

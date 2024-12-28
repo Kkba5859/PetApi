@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Models;
 using PetApi.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,13 @@ namespace PetApi.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<RegisterController> _logger;
+        private readonly IMapper _mapper;
 
-        public RegisterController(ApplicationDbContext context, ILogger<RegisterController> logger)
+        public RegisterController(ApplicationDbContext context, ILogger<RegisterController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         // Метод регистрации пользователя
@@ -24,7 +27,6 @@ namespace PetApi.Controllers
         {
             try
             {
-                // Проверка существования пользователя с использованием асинхронного запроса
                 var existingUser = await _context.Users
                     .Where(u => u.Username == request.Username)
                     .FirstOrDefaultAsync();
@@ -35,12 +37,9 @@ namespace PetApi.Controllers
                     return BadRequest("Пользователь уже существует.");
                 }
 
-                // Создание пользователя с хэшированным паролем
-                var user = new User
-                {
-                    Username = request.Username,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-                };
+                var user = _mapper.Map<User>(request); // Используем AutoMapper
+
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();

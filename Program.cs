@@ -12,6 +12,9 @@ namespace PetApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddAutoMapper(typeof(Program));
+
+
             // Добавляем сервисы в контейнер
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
