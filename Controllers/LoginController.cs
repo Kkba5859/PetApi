@@ -43,6 +43,10 @@ namespace PetApi.Controllers
                     return BadRequest("Неверные учетные данные.");
                 }
 
+                // Установить IsLoggedIn = true
+                user.IsLoggedIn = true;
+                await _context.SaveChangesAsync();
+
                 var claims = new[] { new Claim(ClaimTypes.Name, user.Username) };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -66,5 +70,6 @@ namespace PetApi.Controllers
                 return StatusCode(500, "Произошла ошибка при входе.");
             }
         }
+
     }
 }

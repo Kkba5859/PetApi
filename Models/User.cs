@@ -8,8 +8,8 @@
 
         public string? PasswordHash { get; set; } // Хэшированный пароль
 
-        // Дополнительные поля, если потребуются:
-        // public string Email { get; set; }
-        // public DateTime DateCreated { get; set; }
+        public bool IsLoggedIn { get; set; }
+
+       
     }
 }
