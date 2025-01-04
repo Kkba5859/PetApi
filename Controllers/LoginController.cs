@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PetApi.Models;
 using PetApi.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,14 +16,14 @@ namespace PetApi.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<LoginController> _logger;
-        private readonly IMapper _mapper;
+        
 
-        public LoginController(ApplicationDbContext context, IConfiguration configuration, ILogger<LoginController> logger, IMapper mapper)
+        public LoginController(ApplicationDbContext context, IConfiguration configuration, ILogger<LoginController> logger)
         {
             _context = context;
             _configuration = configuration;
             _logger = logger;
-            _mapper = mapper;
+            
         }
 
         // Метод для входа пользователя
@@ -47,9 +46,9 @@ namespace PetApi.Controllers
                 user.IsLoggedIn = true;
                 await _context.SaveChangesAsync();
 
-                var claims = new[] { new Claim(ClaimTypes.Name, user.Username) };
+                var claims = new[] { new Claim(ClaimTypes.Name, user.Username ?? string.Empty) };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? string.Empty));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var token = new JwtSecurityToken(
